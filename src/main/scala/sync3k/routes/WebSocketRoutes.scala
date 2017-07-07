@@ -17,6 +17,9 @@ trait WebSocketRoutes extends WebSocketDirectives {
   lazy val (sink, source) =
     MergeHub.source[String]
       .zip(Source(Stream.from(1)))
+      .map((item) => {
+        items += item; item
+      })
       .toMat(BroadcastHub.sink)(Keep.both)
       .run()
 
@@ -33,9 +36,6 @@ trait WebSocketRoutes extends WebSocketDirectives {
     )
 
   lazy val webSocketRoutes: Route = {
-    source.runForeach((item) => {
-      items += item
-    })
     pathPrefix("ws") {
       pathEndOrSingleSlash {
         handleWebSocketMessages(wssup())

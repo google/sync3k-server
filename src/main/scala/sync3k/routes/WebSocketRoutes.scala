@@ -43,7 +43,7 @@ trait WebSocketRoutes extends WebSocketDirectives {
         .concat(source)
         .filterNot(_._2 <= skip)
         .map({ case (item, id) => TextMessage(OrderedMessage(id, item).toJson.toString) })
-        .keepAlive(30.seconds, () => TextMessage("\"no-op\""))
+    // .keepAlive(30.seconds, () => TextMessage("\"no-op\""))
     )
 
   lazy val webSocketRoutes: Route = {

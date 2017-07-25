@@ -20,6 +20,8 @@ import scala.collection.mutable.ArrayBuffer
 
 trait WebSocketRoutes extends WebSocketDirectives {
   implicit val materializer: Materializer
+  implicit var kafkaServer: String
+
   private val items = ArrayBuffer[(String, Int)]()
   lazy val (sink, source) =
     MergeHub.source[String]
@@ -56,10 +58,10 @@ trait WebSocketRoutes extends WebSocketDirectives {
     system,
     new ByteArraySerializer,
     new StringSerializer
-  ).withBootstrapServers("localhost:9092")
+  ).withBootstrapServers(kafkaServer)
 
   private lazy val consumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new StringDeserializer)
-    .withBootstrapServers("localhost:9092")
+    .withBootstrapServers(kafkaServer)
     .withGroupId("group1")
 
   def wsKafka(topic: String, offset: Long = 0): Flow[Message, Message, Any] =

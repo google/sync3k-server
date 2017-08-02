@@ -8,7 +8,8 @@ lazy val root = (project in file(".")).
       organization    := "sync3k",
       scalaVersion    := "2.12.2"
     )),
-    name := "Sync3k Server",
+    name := "sync3k-server",
+    version := "0.0.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http"         % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-xml"     % akkaHttpVersion,

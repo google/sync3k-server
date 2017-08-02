@@ -21,4 +21,26 @@ Use `sbt` to run the server.
 sbt "run --port 8080 --kafkaServer kafkaserver:9092"
 ```
 
+## Running everything with Docker
+
+`sync3k-server` includes [Dockerfile](Dockerfile) and [docker compose YAML](docker-compose.yml) that launches `zookeeper`, `kafka` and `sync3k-server`.
+
+To build the Docker image, first build an uber-jar with sbt assembly command:
+
+```sh
+sbt assembly
+```
+
+Then build the Docker image:
+
+```sh
+docker build -t sync3k-server .
+```
+
+Finally, launch everything with `docker-compose`:
+
+```sh
+docker-compose up -d
+```
+
 Disclaimer: This is not an official Google product.

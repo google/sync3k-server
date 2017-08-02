@@ -1,0 +1,23 @@
+version: '2'
+services:
+  zookeeper:
+    image: 'wurstmeister/zookeeper'
+    expose:
+      - "2181"
+  kafka:
+    image: 'wurstmeister/kafka'
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9092"
+  sync3k:
+    image: 'sync3k-server'
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      kafkaServer: 'kafka:9092'

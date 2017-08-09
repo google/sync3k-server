@@ -39,7 +39,7 @@ trait WebSocketRoutes extends WebSocketDirectives {
   private val items = ArrayBuffer[(String, Int)]()
   lazy val (sink, source) =
     MergeHub.source[String]
-      .zip(Source(Stream.from(1)))
+      .zip(Source(Stream.from(0)))
       .map((item) => {
         items += item; item
       })
@@ -54,7 +54,7 @@ trait WebSocketRoutes extends WebSocketDirectives {
   import OrderedMessageProtocol._
 
   def wssup(skip: Int = 0): Flow[Message, Message, Any] =
-    Flow.fromSinkAndSource[Message, Message](
+    Flow.fromSinkAndSourceCoupled(
       Flow[Message].flatMapConcat({
         case tm: TextMessage =>
           tm.textStream
@@ -63,7 +63,6 @@ trait WebSocketRoutes extends WebSocketDirectives {
         .concat(source)
         .filterNot(_._2 < skip)
         .map({ case (item, id) => TextMessage(OrderedMessage(id, item).toJson.toString) })
-    // .keepAlive(30.seconds, () => TextMessage("\"no-op\""))
     )
 
   implicit val system: ActorSystem
@@ -79,7 +78,7 @@ trait WebSocketRoutes extends WebSocketDirectives {
     .withGroupId("group1")
 
   def wsKafka(topic: String, offset: Long = 0): Flow[Message, Message, Any] =
-    Flow.fromSinkAndSource[Message, Message](
+    Flow.fromSinkAndSourceCoupled[Message, Message](
       Flow[Message].flatMapConcat({
         case tm: TextMessage =>
           tm.textStream

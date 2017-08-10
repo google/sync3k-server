@@ -1,52 +1,72 @@
 package sync3k.routes
 
 import akka.http.scaladsl.testkit.{ ScalatestRouteTest, WSProbe }
-import org.scalatest.{ Matchers, WordSpec }
+import net.manub.embeddedkafka.EmbeddedKafka
+import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpec }
 
-class WebSocketRoutesSpec extends WordSpec with Matchers with ScalatestRouteTest with WebSocketRoutes {
-  // TODO(yiinho): embed kafka.
-  override implicit var kafkaServer: String = _
+class WebSocketRoutesSpec extends WordSpec with Matchers with ScalatestRouteTest with WebSocketRoutes with EmbeddedKafka with BeforeAndAfterAll {
+  override implicit var kafkaServer: String = "localhost:6001"
 
-  "In-memory endpoint" should {
-    "echo updates" in {
-      val wsClient = WSProbe()
+  val baseRoots = Table(
+    "base url",
+    "/ws",
+    "/kafka/test-1",
+    "/kafka/test-2"
+  )
 
-      WS("/ws/0", wsClient.flow) ~> webSocketRoutes ~> check {
-        isWebSocketUpgrade shouldBe true
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    EmbeddedKafka.start()
+  }
 
-        wsClient.sendMessage("test1")
-        wsClient.expectMessage("""{"id":0,"message":"test1"}""")
+  override def afterAll(): Unit = {
+    EmbeddedKafka.stop()
+    super.afterAll()
+  }
 
-        wsClient.sendMessage("test2")
-        wsClient.expectMessage("""{"id":1,"message":"test2"}""")
+  forAll(baseRoots) { baseRoot =>
+    baseRoot should {
+      "echo updates" in {
+        val wsClient = WSProbe()
 
-        wsClient.sendCompletion()
-        wsClient.expectCompletion()
+        WS(s"$baseRoot/0", wsClient.flow) ~> webSocketRoutes ~> check {
+          isWebSocketUpgrade shouldBe true
+
+          wsClient.sendMessage("test1")
+          wsClient.expectMessage("""{"id":0,"message":"test1"}""")
+
+          wsClient.sendMessage("test2")
+          wsClient.expectMessage("""{"id":1,"message":"test2"}""")
+
+          wsClient.sendCompletion()
+          wsClient.expectCompletion()
+        }
       }
-    }
 
-    "replay updates" in {
-      val wsClient2 = WSProbe()
+      "replay updates" in {
+        val wsClient2 = WSProbe()
 
-      WS("/ws/0", wsClient2.flow) ~> webSocketRoutes ~> check {
-        isWebSocketUpgrade shouldBe true
+        WS(s"$baseRoot/0", wsClient2.flow) ~> webSocketRoutes ~> check {
+          isWebSocketUpgrade shouldBe true
 
-        wsClient2.expectMessage("""{"id":0,"message":"test1"}""")
-        wsClient2.expectMessage("""{"id":1,"message":"test2"}""")
-        wsClient2.sendCompletion()
-        wsClient2.expectCompletion()
+          wsClient2.expectMessage("""{"id":0,"message":"test1"}""")
+          wsClient2.expectMessage("""{"id":1,"message":"test2"}""")
+          wsClient2.sendCompletion()
+          wsClient2.expectCompletion()
+        }
       }
-    }
 
-    "skip to offset" in {
-      val wsClient3 = WSProbe()
+      "skip to offset" in {
+        val wsClient3 = WSProbe()
 
-      WS("/ws/1", wsClient3.flow) ~> webSocketRoutes ~> check {
-        isWebSocketUpgrade shouldBe true
+        WS(s"$baseRoot/1", wsClient3.flow) ~> webSocketRoutes ~> check {
+          isWebSocketUpgrade shouldBe true
 
-        wsClient3.expectMessage("""{"id":1,"message":"test2"}""")
-        wsClient3.sendCompletion()
-        wsClient3.expectCompletion()
+          wsClient3.expectMessage("""{"id":1,"message":"test2"}""")
+          wsClient3.sendCompletion()
+          wsClient3.expectCompletion()
+        }
       }
     }
   }

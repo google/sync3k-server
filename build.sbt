@@ -18,6 +18,12 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-stream-kafka" % akkaKafkaVersion,
       "com.github.scopt"  %% "scopt"             % "3.6.0",
       "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-      "org.scalatest"     %% "scalatest"         % "3.0.1"         % Test
-    )
+      "org.scalatest"     %% "scalatest"         % "3.0.1"         % Test,
+      "net.manub"         %% "scalatest-embedded-kafka" % "0.15.0" % Test exclude("log4j", "log4j"),
+      "org.slf4j" % "slf4j-simple" % "1.7.21" % Test,
+      "org.slf4j" % "log4j-over-slf4j" % "1.7.21" % Test
+    ),
+    parallelExecution in Test := false,
+    logBuffered in Test := false,
+    fork in Test := true
   )

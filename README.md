@@ -13,6 +13,8 @@ Network binding, listening port and kafka bootstrap server can be configured thr
                            Kafka bootstrap server. Defaults to localhost:9092
 ```
 
+The server is intended to be used with [sync3k-client](https://github.com/google/sync3k-client).
+
 ## Usage
 
 Use `sbt` to run the server.

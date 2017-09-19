@@ -15,7 +15,7 @@ services:
     expose:
       - "9092"
   sync3k:
-    image: 'sync3k-server'
+    image: 'sync3k/sync3k-server'
     build: .
     ports:
       - "8080:8080"

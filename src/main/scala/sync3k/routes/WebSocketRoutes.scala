@@ -14,7 +14,10 @@
 
 package sync3k.routes
 
+import java.util.Base64
+
 import akka.actor.ActorSystem
+import akka.http.javadsl.model.ws.BinaryMessage
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.IntNumber
@@ -58,6 +61,8 @@ trait WebSocketRoutes extends WebSocketDirectives {
       Flow[Message].flatMapConcat({
         case tm: TextMessage =>
           tm.textStream
+        case bm: BinaryMessage =>
+          bm.getStreamedData.map((bs) => Base64.getEncoder.encodeToString(bs.asByteBuffer.array()))
       }).to(sink),
       Source(items.toList)
         .concat(source)
@@ -84,6 +89,8 @@ trait WebSocketRoutes extends WebSocketDirectives {
       Flow[Message].flatMapConcat({
         case tm: TextMessage =>
           tm.textStream
+        case bm: BinaryMessage =>
+          bm.getStreamedData.map((bs) => Base64.getEncoder.encodeToString(bs.asByteBuffer.array()))
       })
         .map((item) => new ProducerRecord[Array[Byte], String](topic, item))
         .to(Producer.plainSink(producerSettings)),

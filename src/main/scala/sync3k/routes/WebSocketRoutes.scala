@@ -15,19 +15,19 @@
 package sync3k.routes
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.ws.{ Message, TextMessage }
+import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.IntNumber
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.PathDirectives.path
 import akka.http.scaladsl.server.directives.WebSocketDirectives
-import akka.kafka.scaladsl.{ Consumer, Producer }
-import akka.kafka.{ ConsumerSettings, ProducerSettings, Subscriptions }
+import akka.kafka.scaladsl.{Consumer, Producer}
+import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, MergeHub, Source }
-import org.apache.kafka.clients.producer.ProducerRecord
+import akka.stream.scaladsl.{BroadcastHub, Flow, Keep, MergeHub, Source}
+import org.apache.kafka.clients.producer.{ProducerConfig, ProducerRecord}
 import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.common.serialization.{ ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer }
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer}
 import spray.json._
 
 import scala.collection.mutable.ArrayBuffer
@@ -72,6 +72,8 @@ trait WebSocketRoutes extends WebSocketDirectives {
     new ByteArraySerializer,
     new StringSerializer
   ).withBootstrapServers(kafkaServer)
+    .withProperty(ProducerConfig.ACKS_CONFIG, "all")
+    .withProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy")
 
   private lazy val consumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new StringDeserializer)
     .withBootstrapServers(kafkaServer)

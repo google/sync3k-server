@@ -82,7 +82,6 @@ trait WebSocketRoutes extends WebSocketDirectives {
 
   private lazy val consumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new StringDeserializer)
     .withBootstrapServers(kafkaServer)
-    .withGroupId("group1")
 
   def wsKafka(topic: String, offset: Long = 0): Flow[Message, Message, Any] =
     Flow.fromSinkAndSourceCoupled[Message, Message](

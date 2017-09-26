@@ -18,19 +18,19 @@ import java.util.Base64
 
 import akka.actor.ActorSystem
 import akka.http.javadsl.model.ws.BinaryMessage
-import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.IntNumber
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.PathDirectives.path
 import akka.http.scaladsl.server.directives.WebSocketDirectives
-import akka.kafka.scaladsl.{Consumer, Producer}
-import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
+import akka.kafka.scaladsl.{ Consumer, Producer }
+import akka.kafka.{ ConsumerSettings, ProducerSettings, Subscriptions }
 import akka.stream.Materializer
-import akka.stream.scaladsl.{BroadcastHub, Flow, Keep, MergeHub, Source}
-import org.apache.kafka.clients.producer.{ProducerConfig, ProducerRecord}
+import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, MergeHub, Source }
+import org.apache.kafka.clients.producer.{ ProducerConfig, ProducerRecord }
 import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.{ ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer }
 import spray.json._
 
 import scala.collection.mutable.ArrayBuffer

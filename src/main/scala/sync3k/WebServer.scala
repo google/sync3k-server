@@ -20,8 +20,6 @@ import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
 import sync3k.routes.{ BaseRoutes, SimpleRoutes, WebSocketRoutes }
 
-import scala.io.StdIn
-
 object WebServer extends Directives with SimpleRoutes with WebSocketRoutes {
   implicit val system = ActorSystem("my-system")
   implicit val materializer = ActorMaterializer()

@@ -36,7 +36,7 @@ sbt assembly
 Then build the Docker image:
 
 ```sh
-docker build -t sync3k/sync3k-server .
+docker build . -t sync3k/sync3k-server .
 ```
 
 Alternatively, you can pull from Docker repo:

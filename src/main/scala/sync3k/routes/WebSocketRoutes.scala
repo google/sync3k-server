@@ -28,6 +28,7 @@ import akka.kafka.scaladsl.{ Consumer, Producer }
 import akka.kafka.{ ConsumerSettings, ProducerSettings, Subscriptions }
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, MergeHub, Source }
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.{ ProducerConfig, ProducerRecord }
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.{ ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer }
@@ -44,12 +45,14 @@ trait WebSocketRoutes extends WebSocketDirectives {
     MergeHub.source[String]
       .zip(Source(Stream.from(0)))
       .map((item) => {
-        items += item; item
+        items += item
+        item
       })
       .toMat(BroadcastHub.sink)(Keep.both)
       .run()
 
   case class OrderedMessage(id: Long, message: String)
+
   object OrderedMessageProtocol extends DefaultJsonProtocol {
     implicit val orderedMessageFormat = jsonFormat2(OrderedMessage.apply)
   }
@@ -82,6 +85,7 @@ trait WebSocketRoutes extends WebSocketDirectives {
 
   private lazy val consumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new StringDeserializer)
     .withBootstrapServers(kafkaServer)
+    .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   def wsKafka(topic: String, offset: Long = 0): Flow[Message, Message, Any] =
     Flow.fromSinkAndSourceCoupled[Message, Message](
